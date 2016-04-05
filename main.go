@@ -15,8 +15,8 @@ func main() {
   app.Usage = "Convenient wrapper around launchctl"
   app.Commands = []cli.Command{
   {
-    Name: "ls",
-    Aliases: []string{"a"},
+    Name: "list",
+    Aliases: []string{"ls"},
     Usage: "add a task to the list",
     Action: func(c *cli.Context) {
       for _, plist := range plists() {
@@ -26,7 +26,6 @@ func main() {
   },
   {
     Name: "start",
-    Aliases: []string{"c"},
     Usage: "complete a task on the list",
     Action: func(c *cli.Context) {
       println("completed task: ", c.Args().First())
@@ -34,7 +33,6 @@ func main() {
   },
   {
     Name: "stop",
-    Aliases: []string{"c"},
     Usage: "complete a task on the list",
     Action: func(c *cli.Context) {
       println("completed task: ", c.Args().First())
@@ -42,7 +40,6 @@ func main() {
   },
   {
     Name: "restart",
-    Aliases: []string{"c"},
     Usage: "complete a task on the list",
     Action: func(c *cli.Context) {
       println("completed task: ", c.Args().First())
@@ -53,8 +50,9 @@ func main() {
   app.Run(os.Args)
 }
 
-func plists() []string {
-  var plists []string
+// Get a list of plist files in each plist directory.
+func plists() map[string]string {
+  plists := make(map[string]string)
 
   for _, dir := range dirs() {
     // Check if the dir exists. If it doesn't, move on to the next.
@@ -70,14 +68,14 @@ func plists() []string {
     }
 
     for _, file := range plist_files {
-      plists = append(plists, file.Name())
+      plists[file.Name()] = path.Join(dir, file.Name())
     }
   }
 
   return plists
 }
 
-//
+// Get a list of direcotries to search.
 func dirs() []string {
   user, err := user.Current()
 
