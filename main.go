@@ -7,6 +7,7 @@ import (
   "io/ioutil"
   "os/user"
   "path"
+  "regexp"
 )
 
 func main() {
@@ -19,7 +20,9 @@ func main() {
     Aliases: []string{"ls"},
     Usage: "add a task to the list",
     Action: func(c *cli.Context) {
-      for _, plist := range plists() {
+      var pattern string = c.Args().First()
+
+      for _, plist := range filter_plists(pattern) {
         fmt.Println(plist)
       }
     },
@@ -48,6 +51,24 @@ func main() {
 }
 
   app.Run(os.Args)
+}
+
+func filter_plists(pattern string) map[string]string {
+  // Return all plists if pattern is empty.
+  if pattern == "" {
+    return plists()
+  }
+
+  filtered_plists := make(map[string]string)
+  regexp := regexp.MustCompile(pattern)
+
+  for k, v := range plists() {
+    if regexp.MatchString(k) {
+      filtered_plists[k] = v
+    }
+  }
+
+  return filtered_plists
 }
 
 // Get a list of plist files in each plist directory.
@@ -94,6 +115,7 @@ func dirs() []string {
   return dirs
 }
 
+// Determine if the current process is running as root.
 func is_root() bool {
   return os.Geteuid() == 0
 }
