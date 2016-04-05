@@ -14,36 +14,47 @@ func main() {
   app := cli.NewApp()
   app.Name = "Launch"
   app.Usage = "Convenient wrapper around launchctl"
-  app.Commands = []cli.Command{
+  app.Flags = []cli.Flag {
+    cli.BoolFlag {
+      Name: "full, f",
+      Usage: "Show full file paths",
+    },
+  }
+  app.Commands = []cli.Command {
   {
     Name: "list",
     Aliases: []string{"ls"},
-    Usage: "add a task to the list",
+    Usage: "List all plist items. Optionally matching PATTERN",
     Action: func(c *cli.Context) {
       var pattern string = c.Args().First()
+      full := c.GlobalBool("full")
 
-      for _, plist := range filter_plists(pattern) {
-        fmt.Println(plist)
+      for short, long := range filter_plists(pattern) {
+        if full {
+          fmt.Println(long)
+        } else {
+          fmt.Println(short)
+        }
       }
     },
   },
   {
     Name: "start",
-    Usage: "complete a task on the list",
+    Usage: "Start a plist",
     Action: func(c *cli.Context) {
       println("completed task: ", c.Args().First())
     },
   },
   {
     Name: "stop",
-    Usage: "complete a task on the list",
+    Usage: "Stop a plist",
     Action: func(c *cli.Context) {
       println("completed task: ", c.Args().First())
     },
   },
   {
     Name: "restart",
-    Usage: "complete a task on the list",
+    Usage: "Restart a plist",
     Action: func(c *cli.Context) {
       println("completed task: ", c.Args().First())
     },
