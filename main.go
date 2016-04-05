@@ -15,20 +15,20 @@ func main() {
   app := cli.NewApp()
   app.Name = "Launch"
   app.Usage = "Convenient wrapper around launchctl"
-  app.Flags = []cli.Flag {
-    cli.BoolFlag {
-      Name: "full, f",
-      Usage: "Show full file paths",
-    },
-  }
   app.Commands = []cli.Command {
   {
     Name: "list",
     Aliases: []string{"ls"},
     Usage: "List all plist items. Optionally matching PATTERN",
+    Flags: []cli.Flag {
+      cli.BoolFlag {
+        Name: "full, f",
+        Usage: "Show full file paths",
+      },
+    },
     Action: func(c *cli.Context) {
       var pattern string = c.Args().First()
-      full := c.GlobalBool("full")
+      full := c.Bool("full")
 
       for short, long := range filter_plists(pattern) {
         if full {
