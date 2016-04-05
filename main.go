@@ -8,6 +8,7 @@ import (
   "os/user"
   "path"
   "regexp"
+  "os/exec"
 )
 
 func main() {
@@ -42,21 +43,22 @@ func main() {
     Name: "start",
     Usage: "Start a plist",
     Action: func(c *cli.Context) {
-      println("completed task: ", c.Args().First())
+      execute_command("load", c)
     },
   },
   {
     Name: "stop",
     Usage: "Stop a plist",
     Action: func(c *cli.Context) {
-      println("completed task: ", c.Args().First())
+      execute_command("unload", c)
     },
   },
   {
     Name: "restart",
     Usage: "Restart a plist",
     Action: func(c *cli.Context) {
-      println("completed task: ", c.Args().First())
+      execute_command("unload", c)
+      execute_command("load", c)
     },
   },
 }
@@ -64,6 +66,43 @@ func main() {
   app.Run(os.Args)
 }
 
+// Executes a command for a single plist item.
+func execute_command(command string, c *cli.Context) {
+  var pattern string = c.Args().First()
+  plist := single_filtered_plist(pattern)
+
+  out, err := exec.Command("launchctl", command, plist).CombinedOutput()
+
+  if err != nil {
+    fmt.Println(err)
+    os.Exit(1)
+  }
+
+  fmt.Print(string(out))
+}
+
+// Return a single plist file path to execute a command on.
+func single_filtered_plist(pattern string) string {
+  filtered_plists := filter_plists(pattern)
+
+  if len(filtered_plists) == 0 {
+    fmt.Println("No matches")
+    os.Exit(1)
+  }
+
+  if len(filtered_plists) > 1 {
+    fmt.Println("Too many matches")
+    os.Exit(1)
+  }
+
+  for _, plist := range filter_plists(pattern) {
+    return plist;
+  }
+
+  return ""
+}
+
+// Filter plist items by a pattern.
 func filter_plists(pattern string) map[string]string {
   // Return all plists if pattern is empty.
   if pattern == "" {
