@@ -14,7 +14,7 @@ func single_filtered_plist(pattern string) string {
   filtered_plists := filter_plists(pattern)
 
   if len(filtered_plists) == 0 {
-    fmt.Println("No matches")
+    fmt.Printf("No matches for '%s'\n", pattern)
     os.Exit(1)
   }
 
@@ -66,11 +66,7 @@ func plists() map[string]string {
     }
 
     plist_files, err := ioutil.ReadDir(dir)
-
-    if err != nil {
-      fmt.Println(err)
-      os.Exit(1)
-    }
+    check_error(err)
 
     for _, file := range plist_files {
       plists[file.Name()] = path.Join(dir, file.Name())
@@ -83,11 +79,7 @@ func plists() map[string]string {
 // Get a list of direcotries to search.
 func dirs() []string {
   user, err := user.Current()
-
-  if err != nil {
-    fmt.Println(err)
-    os.Exit(1)
-  }
+  check_error(err)
 
   dirs := []string{"/Library/LaunchAgents", path.Join(user.HomeDir, "Library", "LaunchAgents")}
 

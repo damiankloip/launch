@@ -78,11 +78,7 @@ func main() {
       plist := single_filtered_plist(pattern)
 
       data, err := ioutil.ReadFile(plist)
-
-      if err != nil {
-        fmt.Println(err)
-        os.Exit(1)
-      }
+      check_error(err)
 
       fmt.Printf("%s", data)
     },
@@ -114,11 +110,15 @@ func execute_command(command string, c *cli.Context) {
   fmt.Println("Executing:", command_obj.Args)
 
   out, err := command_obj.CombinedOutput()
+  check_error(err)
 
+  fmt.Print(string(out))
+}
+
+// Checks and handles errors.
+func check_error(err error) {
   if err != nil {
     fmt.Println(err)
     os.Exit(1)
   }
-
-  fmt.Print(string(out))
 }
