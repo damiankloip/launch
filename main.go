@@ -38,6 +38,12 @@ func main() {
   {
     Name: "start",
     Usage: "Start a plist",
+    Flags: []cli.Flag {
+      cli.BoolFlag {
+        Name: "write, w",
+        Usage: "persist the start behaviour so the agent will load on startup",
+      },
+    },
     Action: func(c *cli.Context) {
       execute_command("load", c)
     },
@@ -45,6 +51,12 @@ func main() {
   {
     Name: "stop",
     Usage: "Stop a plist",
+    Flags: []cli.Flag {
+      cli.BoolFlag {
+        Name: "write, w",
+        Usage: "persist the stop behaviour so the agent will never load on startup",
+      },
+    },
     Action: func(c *cli.Context) {
       execute_command("unload", c)
     },
@@ -65,9 +77,22 @@ func main() {
 // Executes a command for a single plist item.
 func execute_command(command string, c *cli.Context) {
   var pattern string = c.Args().First()
+  write := c.Bool("write")
   plist := single_filtered_plist(pattern)
 
-  out, err := exec.Command("launchctl", command, plist).CombinedOutput()
+  command_args := []string{command}
+
+  if (write) {
+    command_args = append(command_args, "-w")
+  }
+
+  command_args = append(command_args, plist)
+
+  command_obj := exec.Command("launchctl", command_args ...)
+
+  fmt.Println("Executing:", command_obj.Args)
+
+  out, err := command_obj.CombinedOutput()
 
   if err != nil {
     fmt.Println(err)
