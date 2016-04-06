@@ -18,13 +18,13 @@ func main() {
     Usage: "List all plist items. Optionally matching PATTERN",
     Flags: []cli.Flag {
       cli.BoolFlag {
-        Name: "full, f",
+        Name: "long, l",
         Usage: "Show full file paths",
       },
     },
     Action: func(c *cli.Context) {
       var pattern string = c.Args().First()
-      full := c.Bool("full")
+      full := c.Bool("long")
 
       for short, long := range filter_plists(pattern) {
         if full {
