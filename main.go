@@ -5,6 +5,7 @@ import (
   "os"
   "fmt"
   "os/exec"
+  "io/ioutil"
 )
 
 func main() {
@@ -67,6 +68,23 @@ func main() {
     Action: func(c *cli.Context) {
       execute_command("unload", c)
       execute_command("load", c)
+    },
+  },
+  {
+    Name: "show",
+    Usage: "Show the contents of a plist file",
+    Action: func(c *cli.Context) {
+      var pattern string = c.Args().First()
+      plist := single_filtered_plist(pattern)
+
+      data, err := ioutil.ReadFile(plist)
+
+      if err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+      }
+
+      fmt.Printf("%s", data)
     },
   },
 }
