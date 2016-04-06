@@ -19,7 +19,12 @@ func single_filtered_plist(pattern string) string {
   }
 
   if len(filtered_plists) > 1 {
-    fmt.Println("Too many matches")
+    fmt.Println("Too many matches:")
+
+    for k, _ := range filtered_plists {
+      fmt.Println(k)
+    }
+
     os.Exit(1)
   }
 

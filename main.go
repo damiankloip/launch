@@ -98,12 +98,15 @@ func execute_command(command string, c *cli.Context) {
   write := c.Bool("write")
   plist := single_filtered_plist(pattern)
 
+  // Create a slice of command args.
   command_args := []string{command}
 
+  // Add the write flag after the command if needed.
   if (write) {
     command_args = append(command_args, "-w")
   }
 
+  // Add the plist file path.
   command_args = append(command_args, plist)
 
   command_obj := exec.Command("launchctl", command_args ...)
