@@ -1,3 +1,4 @@
 package: github.com/damiankloip/launch
 import:
 - package: github.com/codegangsta/cli
+- package: github.com/fatih/color
