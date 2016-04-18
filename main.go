@@ -109,13 +109,14 @@ func execute_command(command string, c *cli.Context) {
   command_obj := exec.Command("launchctl", command_args ...)
 
   fmt.Print("Executing: ")
-  yellow_cmds := color.New(color.FgGreen)
-  yellow_cmds.Println(command_obj.Args)
+  green := color.New(color.FgGreen)
+  green.Println(command_obj.Args)
 
   out, err := command_obj.CombinedOutput()
   check_error(err)
 
-  fmt.Print(string(out))
+  yellow := color.New(color.FgYellow)
+  yellow.Print("  ", string(out))
 }
 
 // Checks and handles errors.
