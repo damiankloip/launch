@@ -2,6 +2,7 @@ package main
 
 import (
   "github.com/codegangsta/cli"
+  "github.com/fatih/color"
   "os"
   "fmt"
   "os/exec"
@@ -107,7 +108,9 @@ func execute_command(command string, c *cli.Context) {
 
   command_obj := exec.Command("launchctl", command_args ...)
 
-  fmt.Println("Executing:", command_obj.Args)
+  fmt.Print("Executing: ")
+  yellow_cmds := color.New(color.FgGreen)
+  yellow_cmds.Println(command_obj.Args)
 
   out, err := command_obj.CombinedOutput()
   check_error(err)
