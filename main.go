@@ -84,6 +84,35 @@ func main() {
       fmt.Printf("%s", data)
     },
   },
+  {
+    Name: "edit",
+    Usage: "Edit the contents of a plist file",
+    Action: func(c *cli.Context) {
+      editor := os.Getenv("EDITOR");
+
+      if editor == "" {
+        fmt.Println("No $EDITOR environment variable found.")
+        os.Exit(1)
+      }
+
+      var pattern string = c.Args().First()
+      plist := single_filtered_plist(pattern)
+
+      command_obj := exec.Command(editor, plist)
+
+      command_obj.Stdin = os.Stdin
+      command_obj.Stdout = os.Stdout
+      command_obj.Stderr = os.Stderr
+
+      err := command_obj.Start()
+      check_error(err)
+
+      err = command_obj.Wait()
+      check_error(err)
+
+      fmt.Printf("Editing %s\n", plist)
+    },
+  },
 }
 
   app.Run(os.Args)
