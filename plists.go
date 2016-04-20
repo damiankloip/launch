@@ -78,10 +78,7 @@ func plists() map[string]string {
 
 // Get a list of direcotries to search.
 func dirs() []string {
-  user, err := user.Current()
-  check_error(err)
-
-  dirs := []string{"/Library/LaunchAgents", path.Join(user.HomeDir, "Library", "LaunchAgents")}
+  dirs := user_dirs()
 
   if is_root() {
     root_dirs := []string{"/Library/LaunchDaemons", "/System/Library/LaunchDaemons"}
@@ -89,6 +86,13 @@ func dirs() []string {
   }
 
   return dirs
+}
+
+func user_dirs() []string {
+  user, err := user.Current()
+  check_error(err)
+
+  return []string{path.Join(user.HomeDir, "Library", "LaunchAgents"), "/Library/LaunchAgents"}
 }
 
 // Determine if the current process is running as root.

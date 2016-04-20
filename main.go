@@ -4,6 +4,8 @@ import (
   "github.com/codegangsta/cli"
   "github.com/fatih/color"
   "os"
+  "path"
+  "io"
   "fmt"
   "os/exec"
   "io/ioutil"
@@ -91,8 +93,7 @@ func main() {
       editor := os.Getenv("EDITOR");
 
       if editor == "" {
-        fmt.Println("No $EDITOR environment variable found.")
-        os.Exit(1)
+        print_error("No $EDITOR environment variable found.")
       }
 
       var pattern string = c.Args().First()
@@ -113,6 +114,19 @@ func main() {
       fmt.Printf("Editing %s\n", plist)
     },
   },
+  {
+    Name: "install",
+    Usage: "Install a plist to ~/Library/LaunchAgents or /Library/LaunchAgents (whichever it finds first)",
+    Flags: []cli.Flag {
+      cli.BoolFlag {
+        Name: "symlink, s",
+        Usage: "@todo",
+      },
+    },
+    Action: func(c *cli.Context) {
+      install(c)
+    },
+  },
 }
 
   app.Run(os.Args)
@@ -121,6 +135,11 @@ func main() {
 // Executes a command for a single plist item.
 func execute_command(command string, c *cli.Context) {
   var pattern string = c.Args().First()
+
+  if pattern == "" {
+    print_error("No plist pattern provided")
+  }
+
   write := c.Bool("write")
   plist := single_filtered_plist(pattern)
 
@@ -148,10 +167,67 @@ func execute_command(command string, c *cli.Context) {
   yellow.Print("  ", string(out))
 }
 
+func install(c *cli.Context) {
+  var file string = c.Args().First()
+
+  if file == "" {
+    print_error("No file name provided")
+  }
+
+  // Check the file exists.
+  _, err := os.Stat(file)
+  check_error(err)
+
+  if path.Ext(file) != ".plist" {
+    print_error("Only files with the .plist extension can be installed")
+  }
+
+  symlink := c.Bool("symlink")
+
+  for _, dir := range user_dirs() {
+    // Move onto the next if the dir doesn't exist.
+    if _, err := os.Stat(dir); err != nil {
+      continue
+    }
+
+    // Join the source file name with the plist dir.
+    dest_path := path.Join(dir, path.Base(file))
+
+    if symlink {
+      err := os.Symlink(file, dest_path)
+      check_error(err)
+      // If we get here, no errors.
+      fmt.Print("%s installed to %s\n (linked)", file, dest_path)
+    } else {
+      // Copy the file to the directory with the original name.
+      // Open the source file.
+      source, err := os.Open(file)
+      check_error(err)
+
+      dest, err := os.Create(dest_path)
+      defer dest.Close()
+      check_error(err)
+
+      _, err = io.Copy(source, dest)
+      check_error(err)
+
+      fmt.Printf("%s installed to %s\n", file, dest_path)
+    }
+
+    // Always break if the dir exists. Above means it either successfully
+    // wrote/linked a new plist file or failed with an error first.
+    break
+  }
+}
+
 // Checks and handles errors.
 func check_error(err error) {
   if err != nil {
-    fmt.Println(err)
-    os.Exit(1)
+    print_error(err)
   }
+}
+
+func print_error(message interface{}) {
+  fmt.Println(message)
+  os.Exit(1)
 }
