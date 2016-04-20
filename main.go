@@ -120,11 +120,18 @@ func main() {
     Flags: []cli.Flag {
       cli.BoolFlag {
         Name: "symlink, s",
-        Usage: "@todo",
+        Usage: "Symlink the source plist file to the LauchAgents directory (instead of copying)",
       },
     },
     Action: func(c *cli.Context) {
       install(c)
+    },
+  },
+  {
+    Name: "uninstall",
+    Usage: "Uninstall a plist from ~/Library/LaunchAgents or /Library/LaunchAgents (whichever it finds first)",
+    Action: func(c *cli.Context) {
+      uninstall(c)
     },
   },
 }
@@ -134,14 +141,10 @@ func main() {
 
 // Executes a command for a single plist item.
 func execute_command(command string, c *cli.Context) {
-  var pattern string = c.Args().First()
-
-  if pattern == "" {
-    print_error("No plist pattern provided")
-  }
+  pattern := c.Args().First()
+  plist := single_filtered_plist(pattern)
 
   write := c.Bool("write")
-  plist := single_filtered_plist(pattern)
 
   // Create a slice of command args.
   command_args := []string{command}
@@ -197,7 +200,7 @@ func install(c *cli.Context) {
       err := os.Symlink(file, dest_path)
       check_error(err)
       // If we get here, no errors.
-      fmt.Print("%s installed to %s\n (linked)", file, dest_path)
+      fmt.Printf("%s installed to %s (linked)\n", file, dest_path)
     } else {
       // Copy the file to the directory with the original name.
       // Open the source file.
@@ -218,6 +221,16 @@ func install(c *cli.Context) {
     // wrote/linked a new plist file or failed with an error first.
     break
   }
+}
+
+func uninstall(c *cli.Context) {
+  pattern := c.Args().First()
+  plist := single_filtered_plist(pattern)
+
+  err := os.Remove(plist)
+  check_error(err)
+
+  fmt.Printf("Removed %s\n", plist)
 }
 
 // Checks and handles errors.

@@ -11,6 +11,10 @@ import (
 
 // Return a single plist file path to execute a command on.
 func single_filtered_plist(pattern string) string {
+  if pattern == "" {
+    print_error("No plist pattern provided")
+  }
+
   filtered_plists := filter_plists(pattern)
 
   if len(filtered_plists) == 0 {
