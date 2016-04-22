@@ -37,8 +37,10 @@ func execute_command(command string, c *cli.Context) {
   out, err := command_obj.CombinedOutput()
   check_error(err)
 
-  yellow := color.New(color.FgYellow)
-  yellow.Print("  ", string(out))
+  if (len(out) > 0) {
+    yellow := color.New(color.FgYellow)
+    yellow.Print("  ", string(out))
+  }
 }
 
 func install(c *cli.Context) {
