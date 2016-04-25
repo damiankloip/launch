@@ -4,8 +4,6 @@ import (
   "github.com/codegangsta/cli"
   "fmt"
   "os"
-  "io/ioutil"
-  "os/exec"
 )
 
 func main() {
@@ -74,41 +72,14 @@ func main() {
     Name: "show",
     Usage: "Show the contents of a plist file",
     Action: func(c *cli.Context) {
-      var pattern string = c.Args().First()
-      plist := single_filtered_plist(pattern)
-
-      data, err := ioutil.ReadFile(plist)
-      check_error(err)
-
-      fmt.Printf("%s", data)
+      show(c)
     },
   },
   {
     Name: "edit",
     Usage: "Edit the contents of a plist file",
     Action: func(c *cli.Context) {
-      editor := os.Getenv("EDITOR");
-
-      if editor == "" {
-        print_error("No $EDITOR environment variable found.")
-      }
-
-      var pattern string = c.Args().First()
-      plist := single_filtered_plist(pattern)
-
-      command_obj := exec.Command(editor, plist)
-
-      command_obj.Stdin = os.Stdin
-      command_obj.Stdout = os.Stdout
-      command_obj.Stderr = os.Stderr
-
-      err := command_obj.Start()
-      check_error(err)
-
-      err = command_obj.Wait()
-      check_error(err)
-
-      fmt.Printf("Editing %s\n", plist)
+      edit(c)
     },
   },
   {

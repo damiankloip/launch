@@ -8,6 +8,7 @@ import (
   "io"
   "fmt"
   "os/exec"
+  "io/ioutil"
 )
 
 // Executes a command for a single plist item.
@@ -104,6 +105,41 @@ func uninstall(c *cli.Context) {
   check_error(err)
 
   fmt.Printf("Removed %s\n", plist)
+}
+
+func show (c *cli.Context) {
+  var pattern string = c.Args().First()
+  plist := single_filtered_plist(pattern)
+
+  data, err := ioutil.ReadFile(plist)
+  check_error(err)
+
+  fmt.Printf("%s", data)
+}
+
+func edit(c *cli.Context) {
+  editor := os.Getenv("EDITOR");
+
+  if editor == "" {
+    print_error("No $EDITOR environment variable found.")
+  }
+
+  var pattern string = c.Args().First()
+  plist := single_filtered_plist(pattern)
+
+  command_obj := exec.Command(editor, plist)
+
+  command_obj.Stdin = os.Stdin
+  command_obj.Stdout = os.Stdout
+  command_obj.Stderr = os.Stderr
+
+  err := command_obj.Start()
+  check_error(err)
+
+  err = command_obj.Wait()
+  check_error(err)
+
+  fmt.Printf("Editing %s\n", plist)
 }
 
 // Checks and handles errors.
